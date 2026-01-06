@@ -1,4 +1,5 @@
 import Application from "../models/Application.js"
+import { upload } from "../middleware/upload.middleware.js" // Add this import
 
 export const applyJob = async (req, res) => {
   try {
@@ -18,17 +19,32 @@ export const applyJob = async (req, res) => {
       return res.status(400).json({ message: "Already applied to this job" })
     }
 
+    // Get resume file info if uploaded
+    const resumeInfo = req.file ? {
+      resumeUrl: `/uploads/${req.file.filename}`,
+      resumeFileName: req.file.filename,
+      resumeOriginalName: req.file.originalname
+    } : {}
+
     const application = await Application.create({
       job: jobId,
       candidate: req.user.id,
       coverLetter,
+      ...resumeInfo
     })
 
     res.status(201).json(application)
   } catch (error) {
+    console.error("Apply job error:", error)
     res.status(500).json({ message: "Failed to apply for job" })
   }
 }
+
+// Update the route to handle file upload
+export const applyJobWithResume = [
+  upload.single('resume'),
+  applyJob
+]
 
 export const getCandidateApplications = async (req, res) => {
   try {
