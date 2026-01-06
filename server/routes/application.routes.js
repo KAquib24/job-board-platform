@@ -1,39 +1,13 @@
-import express from "express";
+import express from "express"
 import {
-  applyForJob,
-  getEmployerApplications,
+  applyJob,
   getCandidateApplications,
-} from "../controllers/application.controller.js";
+} from "../controllers/application.controller.js"
+import { protect } from "../middleware/auth.middleware.js"
 
-import { protect } from "../middleware/auth.middleware.js";
-import { authorizeRoles } from "../middleware/role.middleware.js";
-import upload from "../middleware/upload.middleware.js";
+const router = express.Router()
 
-const router = express.Router();
+router.post("/:id/apply", protect, applyJob)
+router.get("/me", protect, getCandidateApplications)
 
-// Candidate applies
-router.post(
-  "/apply",
-  protect,
-  authorizeRoles("candidate"),
-  upload.single("resume"),
-  applyForJob
-);
-
-// Employer views applicants
-router.get(
-  "/employer",
-  protect,
-  authorizeRoles("employer"),
-  getEmployerApplications
-);
-
-// Candidate views own applications
-router.get(
-  "/candidate",
-  protect,
-  authorizeRoles("candidate"),
-  getCandidateApplications
-);
-
-export default router;
+export default router

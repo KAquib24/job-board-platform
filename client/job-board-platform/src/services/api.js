@@ -1,8 +1,48 @@
-import axios from "axios";
+import axios from "axios"
 
-const API = axios.create({
-  baseURL: "http://localhost:5000/api",
-});
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  withCredentials: false,
+})
 
-export const fetchJobs = () => API.get("/jobs");
-export const fetchJobById = (id) => API.get(`/jobs/${id}`);
+/**
+ * REQUEST INTERCEPTOR
+ * - Automatically attach JWT token if present
+ */
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token")
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+/**
+ * RESPONSE INTERCEPTOR
+ * - Handle global auth errors
+ * - Auto logout on 401 (token expired / invalid)
+ */
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token")
+
+      // Prevent infinite redirect loops
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login"
+      }
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+export default api

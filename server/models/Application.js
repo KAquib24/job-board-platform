@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const applicationSchema = new mongoose.Schema(
   {
@@ -12,17 +12,15 @@ const applicationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    resume: {
-      type: String, // file path
-      required: true,
-    },
+    coverLetter: String,
+    resumeUrl: String,
     status: {
       type: String,
-      enum: ["applied", "reviewed", "shortlisted", "rejected"],
+      enum: ["applied", "reviewed", "rejected", "accepted"],
       default: "applied",
     },
   },
   { timestamps: true }
-);
+)
 
-export default mongoose.model("Application", applicationSchema);
+export default mongoose.model("Application", applicationSchema)

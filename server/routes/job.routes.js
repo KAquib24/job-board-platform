@@ -1,24 +1,28 @@
-import express from "express";
+import express from "express"
 import {
-  createJob,
   getJobs,
   getJobById,
-  updateJob,
+  getFeaturedJobs,
+  createJob,
+  getEmployerJobs,
   deleteJob,
-} from "../controllers/job.controller.js";
+} from "../controllers/job.controller.js"
+import { protect } from "../middleware/auth.middleware.js"
 
-import { protect } from "../middleware/auth.middleware.js";
-import { authorizeRoles } from "../middleware/role.middleware.js";
-
-const router = express.Router();
+const router = express.Router()
 
 // Public
-router.get("/", getJobs);
-router.get("/:id", getJobById);
+router.get("/", getJobs)
+router.get("/featured", getFeaturedJobs)
 
-// Employer only
-router.post("/", protect, authorizeRoles("employer"), createJob);
-router.put("/:id", protect, authorizeRoles("employer"), updateJob);
-router.delete("/:id", protect, authorizeRoles("employer"), deleteJob);
+// Employer (must come BEFORE :id)
+router.get("/employer/me", protect, getEmployerJobs)
 
-export default router;
+// Job detail (keep after specific routes)
+router.get("/:id", getJobById)
+
+// Employer actions
+router.post("/", protect, createJob)
+router.delete("/:id", protect, deleteJob)
+
+export default router
